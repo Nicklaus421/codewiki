@@ -1,0 +1,24 @@
+[Unit]
+Description=云核软件资产治理平台后端 (FastAPI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=yunhe
+Group=yunhe
+WorkingDirectory=/opt/yunhe/backend
+# 读取环境变量（DEEPSEEK_API_KEY 等）；不存在则忽略
+EnvironmentFile=-/opt/yunhe/backend/.env
+# 单 worker：进程内异步任务队列在同一进程执行，保证任务可预测
+ExecStart=/opt/yunhe/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --access-log
+Restart=always
+RestartSec=5
+# 安全加固
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/opt/yunhe/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

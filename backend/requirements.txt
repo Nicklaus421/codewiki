@@ -1,0 +1,10 @@
+# 云核软件资产治理平台 — 后端依赖
+fastapi>=0.115
+uvicorn[standard]>=0.30
+gunicorn>=22
+sqlalchemy>=2.0
+greenlet>=3.0
+aiosqlite>=0.20
+pydantic>=2.7
+pydantic-settings>=2.3
+openai>=1.40,<3

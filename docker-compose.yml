@@ -1,0 +1,39 @@
+# 云核软件资产治理平台 —— Docker Compose 一键部署
+# 使用：cp .env.example .env && 编辑 .env 填入 DEEPSEEK_API_KEY，然后 docker compose up -d
+services:
+  backend:
+    build: ./backend
+    image: yunhe-asset-backend:latest
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATA_DIR: /data
+      DATABASE_URL: ""
+      # 进程内任务队列只在单 worker 内执行，保持 1 保证任务可预测
+      APP_WORKERS: "1"
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3).status==200 else 1)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    image: yunhe-asset-web:latest
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
